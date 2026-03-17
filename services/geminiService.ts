@@ -273,13 +273,52 @@ YÊU CẦU BẮT BUỘC KHẮT KHE: Nếu bản văn này đã có sự cải th
     console.error("Lỗi đọc lịch sử:", e);
   }
 
+  // Prompt bổ sung cho Cấp Phường
+  let targetPrompt = '';
+  if (input.target === 'Cấp Phường') {
+    targetPrompt = `
+⚠️ ĐẶC BIỆT: ĐÂY LÀ SKKN CẤP PHƯỜNG/XÃ - ÁP DỤNG TIÊU CHÍ RIÊNG:
+
+## 📋 CẤU TRÚC SKKN CẤP PHƯỜNG (không quá 20 trang A4):
+**I. Đặt vấn đề**
+  1. Tính cấp thiết phải tiến hành sáng kiến (thuyết minh chi tiết bằng lời)
+  2. Mục tiêu của đề tài, sáng kiến
+  3. Thời gian, đối tượng, phạm vi nghiên cứu
+
+**II. Nội dung của sáng kiến**
+  1. Hiện trạng vấn đề (Nêu rõ cách làm cũ, phân tích nhược điểm)
+  2. Giải pháp thực hiện sáng kiến để giải quyết vấn đề (Nêu rõ cách làm mới, có tính sáng tạo, hiệu quả, cách thức cụ thể triển khai thực hiện)
+  3. Kết quả sau khi áp dụng giải pháp sáng kiến tại đơn vị
+  4. Hiệu quả của sáng kiến:
+     4.1. Hiệu quả về khoa học
+     4.2. Hiệu quả về kinh tế
+     4.3. Hiệu quả về xã hội
+  5. Tính khả thi (khả năng áp dụng vào thực tiễn công tác của đơn vị, địa phương…)
+  6. Thời gian thực hiện đề tài, sáng kiến
+  7. Kinh phí thực hiện đề tài, sáng kiến
+
+**III. Kiến nghị, đề xuất**
+
+## 🎯 TIÊU CHÍ CHẤM RIÊNG CẤP PHƯỜNG:
+Khi chấm điểm 5 tiêu chí (innovation, scientific, practicality, effectiveness, presentation), hãy ĐẶC BIỆT chú ý:
+- **Tính Mới (30đ)**: Đánh giá tính mới CỦA GIẢI PHÁP so với cách làm cũ tại đơn vị/địa phương. Không yêu cầu tính mới cao như cấp tỉnh/quốc gia.
+- **Tính Khoa Học (10đ)**: Kiểm tra có phân tích hiện trạng rõ, nêu nhược điểm cách làm cũ. Không yêu cầu trích dẫn lý luận nặng.
+- **Tính Thực Tiễn (20đ)**: ĐÂY LÀ TRỌNG TÂM CẤP PHƯỜNG. Giải pháp phải khả thi, dễ áp dụng vào thực tiễn công tác đơn vị/địa phương. Kiểm tra mục "Tính khả thi" và "Hiệu quả xã hội".
+- **Tính Hiệu Quả (30đ)**: Kiểm tra kết quả 3 mặt: khoa học, kinh tế, xã hội. Có số liệu so sánh trước/sau. Thời gian và kinh phí hợp lý.
+- **Hình Thức (10đ)**: Đúng sườn cấp phường (3 phần chính), ngắn gọn ≤ 20 trang, rõ ràng. Không yêu cầu trang bìa/mục lục/phụ lục phức tạp.
+
+Trong mục "structureAnalysis" và "overallConclusion", hãy đánh giá theo sườn cấp phường trên (KHÔNG dùng sườn cấp tỉnh).
+Nếu SKKN thiếu mục nào trong sườn cấp phường → trừ điểm và ghi nhận rõ.
+`;
+  }
+
   const prompt = `
     Phân tích SKKN sau đây:
     - Tên đề tài: ${input.title}
     - Cấp học: ${input.level}
     - Môn học: ${input.subject}
     - Mục tiêu giải: ${input.target}
-${historyPrompt}
+${targetPrompt}${historyPrompt}
     - Nội dung: ${input.content}
   `;
 
