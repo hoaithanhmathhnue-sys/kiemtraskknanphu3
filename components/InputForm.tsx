@@ -18,7 +18,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
     title: '',
     level: 'Tiểu học',
     subject: '',
-    target: 'Cấp Xã',
+    target: 'Cấp Trường',
     content: ''
   });
   const [inputMode, setInputMode] = useState<InputMode>('file');
@@ -87,7 +87,7 @@ const InputForm: React.FC<InputFormProps> = ({ onSubmit, isLoading }) => {
       title: "Một số biện pháp giúp học sinh lớp 5 học tốt môn Lịch sử qua việc sử dụng bản đồ tư duy",
       level: "Tiểu học",
       subject: "Lịch sử",
-      target: "Cấp Tỉnh",
+      target: "Cấp Trường",
       content: `I. ĐẶT VẤN ĐỀ
 Trong bối cảnh đổi mới giáo dục hiện nay, việc phát huy tính tích cực, chủ động của học sinh là vô cùng quan trọng. Môn Lịch sử ở tiểu học thường bị coi là khô khan, khó nhớ. Học sinh thường học vẹt, nhớ trước quên sau.
 
@@ -274,9 +274,8 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-white shadow-sm hover:shadow-md transition-all appearance-none cursor-pointer"
             >
               <option value="Cấp Trường">Cấp Trường</option>
-              <option value="Cấp Xã">Cấp Xã</option>
-              <option value="Cấp Tỉnh">Cấp Tỉnh</option>
-              <option value="Cấp Quốc gia">Cấp Quốc gia</option>
+              <option value="Cấp Phường">Cấp Phường</option>
+              <option value="Cấp Thành phố">Cấp Thành phố</option>
             </select>
           </div>
 
