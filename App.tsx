@@ -336,20 +336,10 @@ const App: React.FC = () => {
                 </span>
               </h2>
 
-              {/* Subtitle */}
-              <h3 className="text-xl md:text-2xl font-bold mb-5">
-                <span className="bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                  NÂNG TẦM SÁNG KIẾN KINH NGHIỆM CỦA BẠN
-                </span>
-              </h3>
-
-              {/* Description */}
-              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-5 leading-relaxed">
-                Công cụ <span className="font-bold text-teal-600">AI</span> hỗ trợ
-                <span className="font-semibold text-red-500"> kiểm tra đạo văn</span>,
-                <span className="font-semibold text-teal-600"> soát lỗi chính tả</span> và
-                <span className="font-semibold text-cyan-600"> tư vấn chiến lược</span>.
-              </p>
+              {/* Ảnh giới thiệu */}
+              <div className="flex justify-center mb-5">
+                <img src="/anh.jpg" alt="Giới thiệu" className="max-w-md w-full rounded-2xl shadow-lg object-contain" />
+              </div>
 
 
             </div>
