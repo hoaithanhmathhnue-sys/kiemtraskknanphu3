@@ -222,14 +222,14 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, input, onRe
       )}
 
       {/* Header Summary */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 border-l-8 border-blue-600">
+      <div className="bg-white rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.08)] p-6 md:p-8 border-l-8 border-teal-500">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
           <div>
             <h2 className="text-3xl font-bold text-gray-800 mb-1">Kết quả Thẩm định SKKN</h2>
           </div>
           <div className="text-center md:text-right">
             <p className="text-sm text-gray-500 uppercase font-semibold">Tổng điểm dự kiến</p>
-            <p className="text-5xl font-black text-blue-600">{scores.total}<span className="text-2xl text-gray-400">/100</span></p>
+            <p className="text-5xl font-black text-teal-600">{scores.total}<span className="text-2xl text-gray-400">/100</span></p>
           </div>
         </div>
 
@@ -238,10 +238,10 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, input, onRe
           {/* Checklist */}
           <button
             onClick={() => { if (!handleTrialBlock()) setShowChecklist(true); }}
-            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg ${
               isTrial
                 ? 'bg-gray-400 opacity-60 cursor-not-allowed'
-                : 'bg-emerald-600 hover:bg-emerald-700 hover:shadow-md'
+                : 'bg-teal-600 hover:bg-teal-700'
             }`}
           >
             <CheckSquare size={18} />
@@ -251,10 +251,10 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, input, onRe
           {/* Tài liệu tham khảo */}
           <button
             onClick={() => { if (!handleTrialBlock()) setShowReferences(true); }}
-            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg ${
               isTrial
                 ? 'bg-gray-400 opacity-60 cursor-not-allowed'
-                : 'bg-indigo-600 hover:bg-indigo-700 hover:shadow-md'
+                : 'bg-cyan-600 hover:bg-cyan-700'
             }`}
           >
             <BookMarked size={18} />
@@ -266,10 +266,10 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, input, onRe
           {/* Tự động sửa SKKN */}
           <button
             onClick={() => { if (!handleTrialBlock()) setShowAutoFix(true); }}
-            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg ${
               isTrial
                 ? 'bg-gray-400 opacity-60 cursor-not-allowed'
-                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 hover:shadow-md'
+                : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600'
             }`}
           >
             <Wand2 size={18} />
@@ -279,10 +279,10 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, input, onRe
           {/* Đề xuất cải thiện */}
           <button
             onClick={() => { if (!handleTrialBlock()) setShowImprovement(true); }}
-            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all ${
+            className={`flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg ${
               isTrial
                 ? 'bg-gray-400 opacity-60 cursor-not-allowed'
-                : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 hover:shadow-md'
+                : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600'
             }`}
           >
             <BarChart3 size={18} />
@@ -329,10 +329,10 @@ const ResultsDashboard: React.FC<ResultsDashboardProps> = ({ result, input, onRe
             <button
               onClick={() => { if (!handleTrialBlock()) setShowExportMenu(!showExportMenu); }}
               disabled={isExporting}
-              className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all disabled:bg-gray-400 ${
+              className={`w-full flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-semibold transition-all shadow-md hover:shadow-lg disabled:bg-gray-400 ${
                 isTrial
                   ? 'bg-gray-400 opacity-60 cursor-not-allowed'
-                  : 'bg-blue-600 hover:bg-blue-700 hover:shadow-md'
+                  : 'bg-teal-600 hover:bg-teal-700'
               }`}
             >
               {isExporting ? <Loader2 size={18} className="animate-spin" /> : <FileDown size={18} />}
