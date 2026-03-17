@@ -236,14 +236,7 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
               onChange={handleChange}
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-white shadow-sm hover:shadow-md transition-all appearance-none cursor-pointer"
             >
-              <option value="Mầm non">Mầm non</option>
               <option value="Tiểu học">Tiểu học</option>
-              <option value="THCS">THCS</option>
-              <option value="THPT">THPT</option>
-              <option value="GDTX">GDTX</option>
-              <option value="Trung cấp">Trung cấp</option>
-              <option value="Cao đẳng">Cao đẳng</option>
-              <option value="Đại học">Đại học</option>
             </select>
           </div>
 
