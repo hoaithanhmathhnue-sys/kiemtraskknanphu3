@@ -1,0 +1,490 @@
+import React, { useState, useRef, useEffect } from 'react';
+import InputForm from './components/InputForm';
+import ResultsDashboard from './components/ResultsDashboard';
+import HistoryPanel from './components/HistoryPanel';
+import ComparePanel from './components/ComparePanel';
+import ApiKeyModal, { ApiKeySettingsButton } from './components/ApiKeyModal';
+import LoginPage from './components/LoginPage';
+import { SKKNInput, AnalysisResult, AnalysisStatus } from './types';
+import { analyzeSKKNWithGemini } from './services/geminiService';
+import { saveToHistory, HistoryItem } from './services/historyService';
+import { getLoggedInUser, logout, VIPAccount, isTrialAccount } from './data/accounts';
+import { useTheme } from './contexts/ThemeContext';
+import { ShieldCheck, BookOpen, History, Sun, Moon, GitCompare, LogOut } from 'lucide-react';
+import { hasAnyKey } from './services/apiKeyService';
+
+const App: React.FC = () => {
+  const { isDark, toggleTheme } = useTheme();
+  const [status, setStatus] = useState<AnalysisStatus>(AnalysisStatus.IDLE);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showCompare, setShowCompare] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
+  const [hasApiKey, setHasApiKey] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loggedInUser, setLoggedInUser] = useState<{ username: string; displayName: string } | null>(null);
+  const [isTrial, setIsTrial] = useState(false);
+  const [showTrialExpiredModal, setShowTrialExpiredModal] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const currentInputRef = useRef<SKKNInput | null>(null);
+
+  // Kiểm tra đăng nhập và API key khi load
+  useEffect(() => {
+    // Kiểm tra đăng nhập
+    const user = getLoggedInUser();
+    if (user) {
+      setIsLoggedIn(true);
+      setLoggedInUser(user);
+      setIsTrial(isTrialAccount(user.username));
+    }
+
+    // Kiểm tra có API key nào không (hỗ trợ nhiều key)
+    const hasKey = hasAnyKey();
+    setHasApiKey(hasKey);
+    if (!hasKey && user) {
+      setShowApiKeyModal(true);
+    }
+  }, []);
+
+  const handleLoginSuccess = (account: VIPAccount) => {
+    setIsLoggedIn(true);
+    setIsTrial(!!account.isTrial);
+    setLoggedInUser({
+      username: account.username,
+      displayName: account.displayName || account.username
+    });
+  };
+
+  const handleLogout = () => {
+    logout();
+    setIsLoggedIn(false);
+    setLoggedInUser(null);
+    setIsTrial(false);
+  };
+
+  const handleApiKeySave = (_apiKey: string, _model: string) => {
+    // Refresh trạng thái key sau khi save
+    setHasApiKey(hasAnyKey());
+  };
+
+  const handleSubmit = async (data: SKKNInput) => {
+    setStatus(AnalysisStatus.LOADING);
+    setErrorMsg(null);
+    setProgress(0);
+    currentInputRef.current = data;
+
+    // Simulate progress bar since AI generation takes time
+    const progressInterval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev < 40) return prev + Math.floor(Math.random() * 5) + 3; // 0-40%: fast
+        if (prev < 70) return prev + Math.floor(Math.random() * 3) + 2; // 40-70%: medium 
+        if (prev < 90) return prev + 1; // 70-90%: slow
+        if (prev < 98) return prev + 0.5; // 90-98%: very slow
+        return prev;
+      });
+    }, 1000);
+
+    try {
+      const analysis = await analyzeSKKNWithGemini(data);
+      clearInterval(progressInterval);
+      setProgress(100);
+
+      // Small delay so user can see 100%
+      setTimeout(() => {
+        setResult(analysis);
+        setStatus(AnalysisStatus.SUCCESS);
+        // Tự động lưu vào lịch sử
+        saveToHistory(data, analysis);
+      }, 500);
+    } catch (error: any) {
+      clearInterval(progressInterval);
+      console.error(error);
+      setStatus(AnalysisStatus.ERROR);
+      setErrorMsg(error.message || "Đã xảy ra lỗi trong quá trình phân tích. Vui lòng kiểm tra API Key hoặc thử lại sau.");
+    }
+  };
+
+  const handleReset = () => {
+    setStatus(AnalysisStatus.IDLE);
+    setResult(null);
+    setErrorMsg(null);
+    setProgress(0);
+    currentInputRef.current = null;
+  };
+
+  const handleViewHistoryResult = (item: HistoryItem) => {
+    setResult(item.result);
+    currentInputRef.current = item.input;
+    setStatus(AnalysisStatus.SUCCESS);
+    setShowHistory(false);
+  };
+
+  // Hiển thị LoginPage nếu chưa đăng nhập
+  if (!isLoggedIn) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
+
+  return (
+    <div className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${isDark ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'}`}>
+      {/* History Panel Modal */}
+      {showHistory && (
+        <HistoryPanel
+          onViewResult={handleViewHistoryResult}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
+
+      {/* Compare Panel Modal */}
+      {showCompare && (
+        <ComparePanel onClose={() => setShowCompare(false)} />
+      )}
+
+      {/* API Key Modal */}
+      <ApiKeyModal
+        isOpen={showApiKeyModal}
+        onClose={() => setShowApiKeyModal(false)}
+        onSave={handleApiKeySave}
+        isRequired={!hasApiKey}
+      />
+
+      {/* Guide Modal */}
+      {showGuide && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowGuide(false)}>
+          <div
+            className={`relative w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl ${isDark ? 'bg-gray-800' : 'bg-white'}`}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <BookOpen size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">Hướng dẫn sử dụng</h2>
+                    <p className="text-teal-100 text-sm">TRỢ LÝ SKKN AN PHÚ 3</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowGuide(false)}
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className={`p-6 space-y-6 ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>
+              {/* Bước 1 */}
+              <div className={`p-4 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-blue-50'}`}>
+                <h3 className={`font-bold text-lg mb-2 flex items-center gap-2 ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                  <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">1</span>
+                  Nhập thông tin SKKN
+                </h3>
+                <ul className="space-y-1 ml-10 list-disc">
+                  <li>Điền <b>Tên đề tài</b> và chọn <b>Lĩnh vực</b></li>
+                  <li>Nhập nội dung SKKN hoặc <b>tải file Word/PDF</b></li>
+                  <li>Sau đó bấm <b>"Phân tích SKKN"</b></li>
+                </ul>
+              </div>
+
+              {/* Bước 2 */}
+              <div className={`p-4 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-green-50'}`}>
+                <h3 className={`font-bold text-lg mb-2 flex items-center gap-2 ${isDark ? 'text-green-300' : 'text-green-700'}`}>
+                  <span className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm">2</span>
+                  Đọc kết quả phân tích
+                </h3>
+                <div className="ml-10 space-y-3">
+                  <div>
+                    <p className="font-semibold">📊 Điểm số tổng quan (100 điểm):</p>
+                    <ul className="list-disc ml-5">
+                      <li><b>Tính mới (30đ):</b> Sáng tạo, độc đáo của giải pháp</li>
+                      <li><b>Khoa học (10đ):</b> Cơ sở lý luận, phương pháp nghiên cứu</li>
+                      <li><b>Thực tiễn (20đ):</b> Khả năng áp dụng thực tế</li>
+                      <li><b>Hiệu quả (30đ):</b> Kết quả minh chứng, số liệu cụ thể</li>
+                      <li><b>Hình thức (10đ):</b> Trình bày, chính tả, ngữ pháp</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-semibold">⚠️ Nguy cơ đạo văn:</p>
+                    <ul className="list-disc ml-5">
+                      <li><span className="text-green-600 font-semibold">Thấp:</span> Nội dung sáng tạo, ít trùng lặp</li>
+                      <li><span className="text-yellow-600 font-semibold">Trung bình:</span> Có một số đoạn cần viết lại</li>
+                      <li><span className="text-red-600 font-semibold">Cao/Rất cao:</span> Cần viết lại nhiều đoạn</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <p className="font-semibold">📝 Các mục phân tích:</p>
+                    <ul className="list-disc ml-5">
+                      <li><b>Lỗi chính tả:</b> Danh sách lỗi cần sửa</li>
+                      <li><b>Đoạn nghi đạo văn:</b> Các đoạn giống nguồn khác</li>
+                      <li><b>Kế hoạch phát triển:</b> Gợi ý cải thiện SKKN</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bước 3 */}
+              <div className={`p-4 rounded-xl ${isDark ? 'bg-gray-700' : 'bg-purple-50'}`}>
+                <h3 className={`font-bold text-lg mb-2 flex items-center gap-2 ${isDark ? 'text-purple-300' : 'text-purple-700'}`}>
+                  <span className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm">3</span>
+                  Tự động sửa SKKN
+                </h3>
+                <ul className="space-y-1 ml-10 list-disc">
+                  <li>Bấm <b>"Tự động Sửa SKKN"</b> để AI tự sửa lỗi</li>
+                  <li>Xem preview với <b>chữ đỏ = đã sửa</b></li>
+                  <li><b>"Xuất Word (Giữ gốc)"</b>: Giữ nguyên format, hình ảnh, công thức</li>
+                  <li><b>"Sao chép"</b>: Copy HTML để dán vào Word</li>
+                </ul>
+              </div>
+
+              {/* Tips */}
+              <div className={`p-4 rounded-xl border-2 border-dashed ${isDark ? 'border-yellow-600 bg-yellow-900/20' : 'border-yellow-400 bg-yellow-50'}`}>
+                <h3 className={`font-bold text-lg mb-2 ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>💡 Mẹo sử dụng</h3>
+                <ul className="space-y-1 ml-4 list-disc">
+                  <li>Sử dụng <b>"Lịch sử"</b> để xem lại các SKKN đã phân tích</li>
+                  <li>Dùng <b>"So sánh"</b> để đối chiếu 2 phiên bản SKKN</li>
+                  <li>Khi xuất Word, chọn <b>"Giữ gốc"</b> để bảo toàn hình ảnh, công thức</li>
+                  <li>Nếu paste vào Word không có màu, dùng <b>Ctrl+Shift+V</b> hoặc Paste Special</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <header className={`shadow-md sticky top-0 z-40 transition-colors ${isDark ? 'bg-gray-800' : 'bg-gradient-to-r from-teal-600 to-cyan-600'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-3 cursor-pointer" onClick={handleReset}>
+            <img src="/logo.png" alt="Logo" className="w-10 h-10 rounded-lg object-contain bg-white/20 p-0.5" />
+            <div>
+              <h1 className="text-xl font-bold tracking-tight leading-none text-white">TRỢ LÝ SKKN AN PHÚ 3</h1>
+              <p className="text-xs font-medium tracking-wide text-teal-100">Thẩm định SKKN bằng AI</p>
+            </div>
+          </div>
+          <div className={`flex items-center gap-2 text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg transition-colors ${isDark ? 'hover:bg-gray-700' : 'hover:bg-white/20'} text-white`}
+              title={isDark ? 'Chế độ sáng' : 'Chế độ tối'}
+            >
+              {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
+            <button
+              onClick={() => setShowHistory(true)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-white ${isDark ? 'hover:bg-gray-700' : 'hover:bg-white/20'}`}
+            >
+              <History size={18} />
+              <span className="hidden sm:inline">Lịch sử</span>
+            </button>
+            <button
+              onClick={() => setShowCompare(true)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors text-white ${isDark ? 'hover:bg-gray-700' : 'hover:bg-white/20'}`}
+              title="So sánh phiên bản"
+            >
+              <GitCompare size={18} />
+              <span className="hidden sm:inline">So sánh</span>
+            </button>
+            <button
+              onClick={() => setShowGuide(true)}
+              className={`hidden md:flex items-center gap-1 px-3 py-2 rounded-lg transition-colors text-white ${isDark ? 'hover:bg-gray-700' : 'hover:bg-white/20'}`}
+            >
+              <BookOpen size={16} /> Hướng dẫn
+            </button>
+            <ApiKeySettingsButton
+              onClick={() => setShowApiKeyModal(true)}
+              hasKey={hasApiKey}
+            />
+
+            {/* Nút Đăng xuất */}
+            <button
+              onClick={handleLogout}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors ${isDark ? 'text-red-400 hover:bg-red-900/30' : 'text-white hover:bg-red-500/30'}`}
+              title="Đăng xuất"
+            >
+              <LogOut size={18} />
+              <span className="hidden sm:inline">Đăng xuất</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-grow p-4 md:p-8">
+        {status === AnalysisStatus.IDLE && (
+          <div className="flex flex-col items-center justify-center space-y-8 py-10">
+            <div className="text-center max-w-3xl mx-auto mb-8">
+              {/* Logo */}
+              <div className="flex justify-center mb-6">
+                <img src="/logo.png" alt="Logo" className="w-24 h-24 rounded-2xl object-contain drop-shadow-lg" />
+              </div>
+
+              {/* Title with teal gradient */}
+              <h1 className="text-4xl md:text-5xl font-black mb-3 tracking-tight">
+                <span className="bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-400 bg-clip-text text-transparent">
+                  TRỢ LÝ SKKN
+                </span>
+              </h1>
+              <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight">
+                <span className="bg-gradient-to-r from-teal-600 via-emerald-500 to-cyan-500 bg-clip-text text-transparent">
+                  AN PHÚ 3
+                </span>
+              </h2>
+
+              {/* Subtitle */}
+              <h3 className="text-xl md:text-2xl font-bold mb-5">
+                <span className="bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                  NÂNG TẦM SÁNG KIẾN KINH NGHIỆM CỦA BẠN
+                </span>
+              </h3>
+
+              {/* Description */}
+              <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-5 leading-relaxed">
+                Công cụ <span className="font-bold text-teal-600">AI</span> hỗ trợ
+                <span className="font-semibold text-red-500"> kiểm tra đạo văn</span>,
+                <span className="font-semibold text-teal-600"> soát lỗi chính tả</span> và
+                <span className="font-semibold text-cyan-600"> tư vấn chiến lược</span>.
+              </p>
+
+              {/* Browser recommendation */}
+              <p className="text-xs md:text-sm font-semibold text-orange-600 dark:text-orange-400 mt-3">
+                KHUYẾN NGHỊ SỬ DỤNG TRÌNH DUYỆT MICROSOFT EDGE ĐỂ TRÁNH CÁC THÔNG BÁO SAI VỀ BẢO MẬT
+              </p>
+
+              {/* Security notice */}
+              <p className="text-xs md:text-sm font-medium text-teal-700 dark:text-teal-400 mt-1 leading-relaxed max-w-2xl">
+                APP ĐẢM BẢO BẢO MẬT NỘI DUNG SKKN CỦA THẦY CÔ, CHỈ LƯU CỤC BỘ TRÊN MÁY THẦY CÔ, KHÔNG CÓ HỆ THỐNG LƯU TRỮ NÀO KHÁC, THẦY CÔ HOÀN TOÀN YÊN TÂM!
+              </p>
+            </div>
+            <InputForm onSubmit={handleSubmit} isLoading={false} />
+          </div>
+        )}
+
+        {status === AnalysisStatus.LOADING && (
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <div className="relative w-24 h-24 mb-6">
+              <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-200 rounded-full"></div>
+              <div className="absolute top-0 left-0 w-full h-full border-4 border-blue-600 rounded-full animate-spin border-t-transparent"></div>
+              {/* Progress text inside the spinner */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="font-bold text-blue-700 text-lg">{Math.floor(progress)}%</span>
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 animate-pulse">Đang thẩm định SKKN...</h3>
+            <p className="text-gray-500 mt-2 max-w-md text-center">Hệ thống đang đối chiếu với cơ sở dữ liệu, kiểm tra lỗi ngữ pháp và tính toán điểm số sáng tạo.</p>
+
+            {/* Progress Bar Container */}
+            <div className="w-full max-w-md mt-8">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-blue-600">Tiến độ phân tích</span>
+                <span className="text-sm font-bold text-blue-800">{Math.floor(progress)}%</span>
+              </div>
+              <div className="w-full bg-blue-100 rounded-full h-3 overflow-hidden shadow-inner">
+                <div
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 h-full rounded-full transition-all duration-700 ease-out relative"
+                  style={{ width: `${progress}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-[shimmer_2s_infinite]"></div>
+                </div>
+              </div>
+              <p className="text-xs text-center text-gray-400 mt-3 italic">
+                {progress < 30 && "Đang đọc nội dung và phân tích cấu trúc..."}
+                {progress >= 30 && progress < 60 && "Đang đối chiếu dữ liệu đạo văn..."}
+                {progress >= 60 && progress < 90 && "Đang đánh giá tiêu chí khoa học & tính mới..."}
+                {progress >= 90 && "Đang tổng hợp điểm số và hoàn thiện báo cáo..."}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {status === AnalysisStatus.ERROR && (
+          <div className="max-w-2xl mx-auto mt-10 p-8 bg-red-50 rounded-2xl border border-red-200">
+            <div className="text-center mb-6">
+              <div className="inline-flex p-4 bg-red-100 rounded-full text-red-600 mb-4">
+                <ShieldCheck size={40} />
+              </div>
+              <h3 className="text-2xl font-bold text-red-800 mb-2">Rất tiếc, đã có lỗi xảy ra</h3>
+            </div>
+
+            {/* Hiển thị thông báo lỗi dạng pre để giữ format */}
+            <div className="bg-white p-4 rounded-xl border border-red-200 mb-6">
+              <pre className="text-red-700 whitespace-pre-wrap text-sm leading-relaxed font-sans">
+                {errorMsg}
+              </pre>
+            </div>
+
+            {/* Nút hành động */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button
+                onClick={() => setShowApiKeyModal(true)}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium"
+              >
+                🔑 Đổi API Key
+              </button>
+              <button
+                onClick={() => {
+                  setErrorMsg(null);
+                  setStatus(AnalysisStatus.IDLE);
+                }}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors font-medium"
+              >
+                🔄 Thử lại
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Trial Expired Modal */}
+        {showTrialExpiredModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6 text-center">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <span className="text-3xl">⏰</span>
+                </div>
+                <h3 className="text-xl font-black text-white">Hết Lượt Dùng Thử</h3>
+              </div>
+              <div className="p-6 text-center">
+                <p className="text-gray-700 text-base leading-relaxed mb-6">
+                  Thầy cô hết lượt dùng thử, liên hệ{' '}
+                  <span className="font-bold text-blue-600">zalo 0348296773</span>
+                  {' '}hoặc{' '}
+                  <span className="font-bold text-blue-600">Liên hệ hỗ trợ</span>
+                  {' '}để đăng ký sử dụng full tính năng và không giới hạn.
+                </p>
+                <div className="flex flex-col gap-3">
+                  <a href="https://zalo.me/0348296773" target="_blank" rel="noreferrer"
+                    className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
+                    💬 Liên hệ Zalo 0348296773
+                  </a>
+                  <a href="https://www.facebook.com/tranhoaithanhvicko/" target="_blank" rel="noreferrer"
+                    className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2">
+                    👤 Facebook hỗ trợ
+                  </a>
+                  <button onClick={() => setShowTrialExpiredModal(false)}
+                    className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors">
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {status === AnalysisStatus.SUCCESS && result && (
+          <ResultsDashboard result={result} input={currentInputRef.current || undefined} onReset={handleReset} isTrial={isTrial} />
+        )}
+      </main>
+
+
+    </div>
+  );
+};
+
+export default App;
+

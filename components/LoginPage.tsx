@@ -1,0 +1,255 @@
+import React, { useState } from 'react';
+import { ShieldCheck, User, Lock, Eye, EyeOff, Sparkles, PlayCircle } from 'lucide-react';
+import { authenticateUser, saveLoginState, VIPAccount, hasUsedTrial, markTrialUsed, TRIAL_ACCOUNT } from '../data/accounts';
+
+interface LoginPageProps {
+    onLoginSuccess: (user: VIPAccount) => void;
+}
+
+const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [showTrialUsedModal, setShowTrialUsedModal] = useState(false);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError('');
+        setIsLoading(true);
+
+        // Simulate loading
+        await new Promise(resolve => setTimeout(resolve, 800));
+
+        const account = authenticateUser(username, password);
+
+        if (account) {
+            if (account.isTrial) {
+                if (hasUsedTrial()) {
+                    setShowTrialUsedModal(true);
+                    setIsLoading(false);
+                    return;
+                }
+                markTrialUsed();
+            }
+            saveLoginState(account);
+            onLoginSuccess(account);
+        } else {
+            setError('Tên đăng nhập hoặc mật khẩu không đúng!');
+        }
+
+        setIsLoading(false);
+    };
+
+    const handleTryFree = async () => {
+        setError('');
+        setIsLoading(true);
+
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        if (hasUsedTrial()) {
+            setShowTrialUsedModal(true);
+            setIsLoading(false);
+            return;
+        }
+
+        markTrialUsed();
+        saveLoginState(TRIAL_ACCOUNT);
+        onLoginSuccess(TRIAL_ACCOUNT);
+        setIsLoading(false);
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-teal-900 via-cyan-900 to-emerald-900 relative overflow-hidden">
+            {/* Animated background elements */}
+            <div className="absolute inset-0 overflow-hidden">
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-full opacity-20 animate-pulse"></div>
+                <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full opacity-20 animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-cyan-500 to-teal-500 rounded-full opacity-10 animate-pulse" style={{ animationDelay: '2s' }}></div>
+
+                {/* Floating particles */}
+                {[...Array(20)].map((_, i) => (
+                    <div
+                        key={i}
+                        className="absolute w-2 h-2 bg-white rounded-full opacity-30 animate-bounce"
+                        style={{
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                            animationDuration: `${2 + Math.random() * 3}s`,
+                            animationDelay: `${Math.random() * 2}s`
+                        }}
+                    />
+                ))}
+            </div>
+
+            {/* Trial Used Modal */}
+            {showTrialUsedModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+                    <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+                        <div className="bg-gradient-to-r from-orange-500 to-red-500 p-6 text-center">
+                            <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <span className="text-3xl">⏰</span>
+                            </div>
+                            <h3 className="text-xl font-black text-white">Hết Lượt Dùng Thử</h3>
+                        </div>
+                        <div className="p-6 text-center">
+                            <p className="text-gray-700 text-base leading-relaxed mb-6">
+                                Thầy cô hết lượt dùng thử, liên hệ{' '}
+                                <span className="font-bold text-blue-600">zalo 0348296773</span>
+                                {' '}hoặc{' '}
+                                <span className="font-bold text-blue-600">Liên hệ hỗ trợ</span>
+                                {' '}để đăng ký sử dụng full tính năng và không giới hạn.
+                            </p>
+                            <div className="flex flex-col gap-3">
+                                <a
+                                    href="https://zalo.me/0348296773"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                                >
+                                    💬 Liên hệ Zalo 0348296773
+                                </a>
+                                <a
+                                    href="https://www.facebook.com/tranhoaithanhvicko/"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="w-full py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl transition-colors flex items-center justify-center gap-2"
+                                >
+                                    👤 Facebook hỗ trợ
+                                </a>
+                                <button
+                                    onClick={() => setShowTrialUsedModal(false)}
+                                    className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-colors"
+                                >
+                                    Đóng
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Login Card */}
+            <div className="relative z-10 w-full max-w-md">
+                {/* Glass Card */}
+                <div className="backdrop-blur-xl bg-white/10 rounded-3xl shadow-2xl border border-white/20 overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-teal-500 p-8 text-center">
+                        <div className="inline-flex items-center justify-center w-20 h-20 bg-white/20 rounded-2xl mb-4 backdrop-blur-sm">
+                            <img src="/logo.png" alt="Logo" className="w-14 h-14 rounded-xl object-contain" />
+                        </div>
+                        <h1 className="text-3xl font-black text-white mb-2 tracking-tight">
+                            <span className="bg-gradient-to-r from-yellow-200 via-white to-cyan-200 bg-clip-text text-transparent">
+                                TRỢ LÝ SKKN AN PHÚ 3
+                            </span>
+                        </h1>
+                        <p className="text-white/80 text-sm">
+                            Đăng nhập để sử dụng hệ thống
+                        </p>
+                    </div>
+
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                        {/* Username */}
+                        <div className="space-y-2">
+                            <label className="text-white/90 text-sm font-medium flex items-center gap-2">
+                                <User size={16} />
+                                Tên đăng nhập
+                            </label>
+                            <input
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
+                                placeholder="Nhập tên đăng nhập"
+                                required
+                            />
+                        </div>
+
+                        {/* Password */}
+                        <div className="space-y-2">
+                            <label className="text-white/90 text-sm font-medium flex items-center gap-2">
+                                <Lock size={16} />
+                                Mật khẩu
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all pr-12"
+                                    placeholder="Nhập mật khẩu"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Error */}
+                        {error && (
+                            <div className="p-3 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm text-center">
+                                {error}
+                            </div>
+                        )}
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full py-4 bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-500 text-white font-bold rounded-xl hover:from-teal-600 hover:via-cyan-600 hover:to-teal-600 transform hover:scale-[1.02] transition-all shadow-lg shadow-teal-500/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            {isLoading ? (
+                                <>
+                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Đang xác thực...
+                                </>
+                            ) : (
+                                <>
+                                    <Sparkles size={20} />
+                                    ĐĂNG NHẬP
+                                </>
+                            )}
+                        </button>
+
+                        {/* Divider */}
+                        <div className="flex items-center gap-3">
+                            <div className="flex-1 h-px bg-white/20"></div>
+                            <span className="text-white/50 text-sm">hoặc</span>
+                            <div className="flex-1 h-px bg-white/20"></div>
+                        </div>
+
+                        {/* Trial Button */}
+                        <button
+                            type="button"
+                            onClick={handleTryFree}
+                            disabled={isLoading}
+                            className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-bold rounded-xl transform hover:scale-[1.02] transition-all shadow-lg shadow-emerald-500/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 border-2 border-emerald-400/50"
+                        >
+                            <PlayCircle size={22} />
+                            🎯 DÙNG THỬ MIỄN PHÍ
+                        </button>
+                        <p className="text-white/40 text-xs text-center -mt-3">
+                            * Mỗi trình duyệt chỉ được dùng thử 1 lần. Tính năng nâng cao bị giới hạn.
+                        </p>
+                    </form>
+
+                    {/* Footer */}
+                    <div className="px-8 pb-6 text-center">
+                        <p className="text-white/40 text-xs">
+                            © 2024 TRỢ LÝ SKKN AN PHÚ 3
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default LoginPage;
