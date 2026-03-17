@@ -152,7 +152,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
                     {/* Footer */}
                     <div className="px-8 pb-6 text-center">
                         <p className="text-white/40 text-xs">
-                            © 2024 TRỢ LÝ SKKN AN PHÚ 3
+                            © 2026 TRỢ LÝ SKKN AN PHÚ 3
                         </p>
                     </div>
                 </div>
