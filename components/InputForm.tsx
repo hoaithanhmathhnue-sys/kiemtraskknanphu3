@@ -114,7 +114,7 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={() => setShowApiKeyGuide(false)}>
         <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden" onClick={e => e.stopPropagation()}>
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-center relative">
+          <div className="bg-gradient-to-r from-teal-600 to-cyan-600 p-6 text-center relative">
             <button onClick={() => setShowApiKeyGuide(false)} className="absolute right-4 top-4 p-1 hover:bg-white/20 rounded-lg transition-colors text-white">
               <X size={20} />
             </button>
@@ -175,7 +175,7 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
             {/* Nút đóng */}
             <button
               onClick={() => setShowApiKeyGuide(false)}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+              className="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition-colors"
             >
               Đã hiểu, tôi sẽ lấy API Key
             </button>
@@ -184,10 +184,10 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
       </div>
     )}
 
-    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden animate-fade-in-up">
-      <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-white text-center">
+    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] overflow-hidden animate-fade-in-up border border-teal-100">
+      <div className="bg-gradient-to-r from-teal-600 via-teal-500 to-cyan-500 p-6 text-white text-center">
         <h2 className="text-2xl font-bold mb-2">Nhập thông tin SKKN</h2>
-        <p className="text-blue-100 opacity-90">Hệ thống sẽ phân tích và đưa ra báo cáo chi tiết trong vài giây</p>
+        <p className="text-teal-50 opacity-90">Hệ thống sẽ phân tích và đưa ra báo cáo chi tiết trong vài giây</p>
       </div>
 
       <form onSubmit={handleSubmit} className="p-8 space-y-6">
@@ -195,7 +195,7 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
           {/* Title */}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <FileText size={18} className="text-blue-600" /> Tên đề tài SKKN
+              <FileText size={18} className="text-teal-600" /> Tên đề tài SKKN
             </label>
             <div className="flex gap-2">
               <input
@@ -204,15 +204,15 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="Ví dụ: Một số biện pháp giúp học sinh..."
-                className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition-all shadow-sm hover:shadow-md bg-white"
               />
               <button
                 type="button"
                 onClick={handleAnalyzeTitle}
                 disabled={isAnalyzingTitle || !formData.title.trim()}
-                className={`px-4 py-3 rounded-lg font-medium text-white flex items-center gap-2 transition-all ${isAnalyzingTitle || !formData.title.trim()
+                className={`px-4 py-3 rounded-xl font-medium text-white flex items-center gap-2 transition-all shadow-md hover:shadow-lg ${isAnalyzingTitle || !formData.title.trim()
                   ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-purple-600 hover:bg-purple-700 hover:shadow-lg'
+                  : 'bg-teal-600 hover:bg-teal-700 hover:shadow-teal-200'
                   }`}
                 title="Phân tích tên đề tài"
               >
@@ -228,13 +228,13 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
           {/* Level */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <GraduationCap size={18} className="text-blue-600" /> Cấp học
+              <GraduationCap size={18} className="text-teal-600" /> Cấp học
             </label>
             <select
               name="level"
               value={formData.level}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-white shadow-sm hover:shadow-md transition-all appearance-none cursor-pointer"
             >
               <option value="Mầm non">Mầm non</option>
               <option value="Tiểu học">Tiểu học</option>
@@ -250,7 +250,7 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
           {/* Subject */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <BookOpen size={18} className="text-blue-600" /> Môn học / Lĩnh vực
+              <BookOpen size={18} className="text-teal-600" /> Môn học / Lĩnh vực
             </label>
             <input
               type="text"
@@ -258,20 +258,20 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
               value={formData.subject}
               onChange={handleChange}
               placeholder="VD: Toán, Ngữ Văn, Quản lý..."
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 transition-all shadow-sm hover:shadow-md bg-white"
             />
           </div>
 
           {/* Target */}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <Target size={18} className="text-red-600" /> Mục tiêu thi đạt giải
+              <Target size={18} className="text-teal-600" /> Mục tiêu thi đạt giải
             </label>
             <select
               name="target"
               value={formData.target}
               onChange={handleChange}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 bg-white shadow-sm hover:shadow-md transition-all appearance-none cursor-pointer"
             >
               <option value="Cấp Trường">Cấp Trường</option>
               <option value="Cấp Xã">Cấp Xã</option>
@@ -283,23 +283,23 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
           {/* Content */}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center justify-between">
-              <span className="flex items-center gap-2"><FileText size={18} className="text-blue-600" /> Nội dung SKKN</span>
+              <span className="flex items-center gap-2"><FileText size={18} className="text-teal-600" /> Nội dung SKKN</span>
               <button
                 type="button"
                 onClick={handleSampleData}
-                className="text-xs text-blue-600 hover:text-blue-800 underline font-normal"
+                className="text-xs text-teal-600 hover:text-teal-800 underline font-normal"
               >
                 Dùng dữ liệu mẫu
               </button>
             </label>
 
             {/* Toggle Tabs */}
-            <div className="flex mb-4 bg-gray-100 rounded-lg p-1">
+            <div className="flex mb-4 bg-gray-100 rounded-xl p-1.5 shadow-inner">
               <button
                 type="button"
                 onClick={() => setInputMode('file')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md font-medium text-sm transition-all ${inputMode === 'file'
-                  ? 'bg-white text-blue-600 shadow-sm'
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${inputMode === 'file'
+                  ? 'bg-white text-teal-600 shadow-md'
                   : 'text-gray-600 hover:text-gray-800'
                   }`}
               >
@@ -308,8 +308,8 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
               <button
                 type="button"
                 onClick={() => setInputMode('text')}
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-md font-medium text-sm transition-all ${inputMode === 'text'
-                  ? 'bg-white text-blue-600 shadow-sm'
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg font-medium text-sm transition-all ${inputMode === 'text'
+                  ? 'bg-white text-teal-600 shadow-md'
                   : 'text-gray-600 hover:text-gray-800'
                   }`}
               >
@@ -350,7 +350,7 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
                   value={formData.content}
                   onChange={handleChange}
                   placeholder="Dán nội dung SKKN của bạn vào đây (ít nhất 200 từ để có kết quả tốt nhất)..."
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[300px] font-mono text-sm"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-teal-400 focus:border-teal-400 min-h-[300px] font-mono text-sm shadow-sm hover:shadow-md transition-all bg-white"
                   required={inputMode === 'text'}
                 />
                 <p className="text-xs text-gray-500 mt-2 text-right">
@@ -366,8 +366,8 @@ Qua áp dụng sáng kiến, chất lượng môn Lịch sử lớp 5A đã đư
             type="submit"
             disabled={isLoading}
             className={`
-              flex items-center gap-3 px-8 py-4 rounded-full text-lg font-bold text-white shadow-lg transform transition-all hover:scale-105
-              ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-xl'}
+              flex items-center gap-3 px-10 py-4 rounded-full text-lg font-bold text-white shadow-lg transform transition-all hover:scale-105
+              ${isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:shadow-[0_8px_25px_rgba(13,148,136,0.4)] hover:from-teal-600 hover:to-cyan-600'}
             `}
           >
             {isLoading ? (
